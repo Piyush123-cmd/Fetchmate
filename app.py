@@ -22,6 +22,8 @@ def get_formats():
             'quiet': True,
             'skip_download': True,
             'no_warnings': True
+            'cookiefile': 'cookies.txt'
+
         }) as ydl:
             info = ydl.extract_info(url, download=False)
             seen = set()
@@ -64,6 +66,8 @@ def download():
         'retries': 10,
         'socket_timeout': 30,
         'nocheckcertificate': True,
+        'cookiefile': 'cookies.txt'
+
     }
 
     try:
