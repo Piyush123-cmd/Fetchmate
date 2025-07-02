@@ -1,0 +1,173 @@
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FetchMate – YouTube Video Downloader</title>
+  <meta name="description" content="Fast and free YouTube video downloader. Download YouTube videos in MP4, MP3, and HD quality. No login required.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="logo">FetchMate</h1>
+      <p class="tagline">YouTube Video Downloader</p>
+    </header>
+
+    <section class="download-box">
+      <form action="/download" method="POST">
+        <input type="text" name="url" placeholder="Paste YouTube video URL here..." required>
+        <button type="submit">Download</button>
+      </form>
+      <p class="info-text">Fast. Free. Supports MP4, MP3, HD and more.</p>
+    </section>
+
+    <footer>
+      <p>© 2025 FetchMate. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
+
+
+style.css
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background-color: #f5f7fa;
+  color: #1a1a1a;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #0073ff;
+  margin-bottom: 5px;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+.download-box {
+  background-color: #ffffff;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  outline: none;
+}
+
+button {
+  padding: 14px 30px;
+  font-size: 16px;
+  background-color: #0073ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  background-color: #005fd9;
+}
+
+.info-text {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+footer {
+  margin-top: 30px;
+  font-size: 13px;
+  color: #888;
+}
+
+
+app.py
+from flask import Flask, request, send_file, render_template, url_for
+import yt_dlp
+import os
+import uuid
+import threading
+import time
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/download', methods=['POST'])
+def download():
+    url = request.form['url']
+    file_id = str(uuid.uuid4())
+    output_path = f"{file_id}.mp4"
+
+    ydl_opts = {
+        'outtmpl': output_path,
+        'format': 'best',
+        'quiet': True
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+        if not os.path.exists(output_path):
+            return "<h3 style='color:red'>Error: Video not downloaded.</h3>"
+
+        if os.path.getsize(output_path) == 0:
+            return "<h3 style='color:red'>Error: Downloaded file is empty.</h3>"
+
+        response = send_file(output_path, as_attachment=True)
+        return response
+
+    except Exception as e:
+        return f"<h3 style='color:red'>Download failed: {e}</h3>"
+
+    finally:
+        def delete_file_later(path):
+            time.sleep(2)
+            if os.path.exists(path):
+                os.remove(path)
+
+        threading.Thread(target=delete_file_later, args=(output_path,)).start()
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+requirements.txt
+flask
+yt-dlp

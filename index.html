@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FetchMate – YouTube Video Downloader</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+
+  <meta name="description" content="Fast and free YouTube video downloader. Download YouTube videos in MP4, MP3, and HD quality. No login required.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="logo">FetchMate</h1>
+      <p class="tagline">YouTube Video Downloader</p>
+    </header>
+
+    <section class="download-box">
+      <input type="text" id="urlInput" placeholder="Paste YouTube video URL here..." required>
+      <button onclick="fetchFormats()">Convert Next</button>
+
+      <div id="spinner" style="display:none; margin-top: 10px; color: #0073ff;">
+        🔄 Fetching formats, please wait...
+      </div>
+
+      <form id="downloadForm" action="/download" method="POST" target="_blank">
+        <input type="hidden" name="url" id="formUrl" />
+        <div id="format-section" style="display:none; margin-top: 15px;">
+          <select name="format_id" id="formatSelect" required>
+            <option value="">Select Quality</option>
+          </select>
+          <br><br>
+          <button type="submit">Download</button>
+        </div>
+      </form>
+
+      <p class="info-text">Fast. Free. Supports MP4, MP3, HD and more.</p>
+    </section>
+
+    <footer>
+      <p>© 2025 FetchMate. All rights reserved.</p>
+    </footer>
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
